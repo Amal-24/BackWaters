@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="space-y-8">
+    <!-- Header -->
+    <div class="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-4 mb-4">
+            <div class="p-3 bg-green-50 rounded-xl text-green-600">
+                <i class="fas fa-chart-line text-3xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Profitability Analysis</h1>
+                <p class="text-gray-500">Current Month Financial Performance ({{ now.strftime('%B %Y') }})</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% set total_revenue = report | map(attribute='total_revenue') | sum %}
+        {% set total_expense = report | map(attribute='total_fuel_cost') | sum %}
+        {% set total_profit = report | map(attribute='profit') | sum %}
+
+        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Total Revenue</p>
+            <h3 class="text-2xl font-bold text-indigo-600">₹{{ "{:,.0f}".format(total_revenue) }}</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Total Fuel Cost</p>
+            <h3 class="text-2xl font-bold text-amber-600">₹{{ "{:,.0f}".format(total_expense) }}</h3>
+        </div>
+        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+            <p class="text-sm font-medium text-gray-500 uppercase tracking-wider mb-2">Net Profit</p>
+            <h3 class="text-2xl font-bold {% if total_profit >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                ₹{{ "{:,.0f}".format(total_profit) }}
+            </h3>
+        </div>
+    </div>
+
+    <!-- Analysis Table -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th class="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Houseboat</th>
+                        <th class="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Revenue</th>
+                        <th class="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Fuel Costs</th>
+                        <th class="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Net Profit</th>
+                        <th class="px-8 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Performance</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    {% for item in report %}
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-8 py-6 font-semibold text-gray-900">{{ item.name }}</td>
+                        <td class="px-8 py-6 text-indigo-600 font-medium">₹{{ "{:,.0f}".format(item.total_revenue) }}</td>
+                        <td class="px-8 py-6 text-amber-600 font-medium">₹{{ "{:,.0f}".format(item.total_fuel_cost) }}</td>
+                        <td class="px-8 py-6 font-bold {% if item.profit >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                            ₹{{ "{:,.0f}".format(item.profit) }}
+                        </td>
+                        <td class="px-8 py-6 text-right">
+                            {% if item.total_revenue > 0 %}
+                                {% set margin = (item.profit / item.total_revenue * 100) | round(1) %}
+                                <div class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold {% if margin > 50 %}bg-green-100 text-green-700{% elif margin > 20 %}bg-blue-100 text-blue-700{% else %}bg-amber-100 text-amber-700{% endif %}">
+                                    {{ margin }}% Margin
+                                </div>
+                            {% else %}
+                                <span class="text-gray-400 text-xs italic">N/A</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if not report %}
+                    <tr>
+                        <td colspan="5" class="px-8 py-12 text-center text-gray-400 italic">No data available for this month yet.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
