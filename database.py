@@ -39,12 +39,13 @@ def update_boat(boat_id, name, rooms, ac_type):
 def delete_boat(boat_id):
     return boats_collection.delete_one({"_id": ObjectId(boat_id)})
 
-def add_booking(boat_id, guest_name, date_str, revenue):
+def add_booking(boat_id, guest_name, date_str, revenue, rooms_booked=1):
     booking_date = datetime.strptime(date_str, "%Y-%m-%d")
     booking = {
         "guest_name": guest_name,
         "date": booking_date,
-        "revenue": float(revenue)
+        "revenue": float(revenue),
+        "rooms_booked": int(rooms_booked)
     }
     return boats_collection.update_one(
         {"_id": ObjectId(boat_id)},

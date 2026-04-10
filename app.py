@@ -21,7 +21,8 @@ app.json_encoder = MongoJSONEncoder
 def index():
     search_query = request.args.get('search')
     boats = get_all_boats(search_query)
-    return render_template('index.html', boats=boats, search_query=search_query)
+    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    return render_template('index.html', boats=boats, search_query=search_query, today=today)
 
 @app.route('/boat/add', methods=['POST'])
 def boat_add():
@@ -49,7 +50,8 @@ def booking_add(boat_id):
     guest_name = request.form.get('guest_name')
     date_str = request.form.get('date')
     revenue = request.form.get('revenue')
-    add_booking(boat_id, guest_name, date_str, revenue)
+    rooms_booked = request.form.get('rooms_booked', 1)
+    add_booking(boat_id, guest_name, date_str, revenue, rooms_booked)
     return redirect(request.referrer or url_for('index'))
 
 @app.route('/fuel/add/<boat_id>', methods=['POST'])
