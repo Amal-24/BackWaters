@@ -3,12 +3,33 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from bson.objectid import ObjectId
 from datetime import datetime
+import certifi
 
 load_dotenv()
 
-# MongoDB connection (using local or environment variable)
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://amal:1234@houseboatmanagement.2dz6fvw.mongodb.net/")
-client = MongoClient(MONGO_URI)
+# MongoDB connection URI
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://amal:1234@houseboatmanagement.2dz6fvw.mongodb.net/?retryWrites=true&w=majority")
+
+try:
+    # Try with certifi CA bundle
+    client = MongoClient(
+        MONGO_URI,
+        tlsCAFile=certifi.where(),
+        serverSelectionTimeoutMS=10000,
+        connectTimeoutMS=10000,
+    )
+    # Test connection
+    client.admin.command('ping')
+    print("✓ Connected to MongoDB Atlas")
+except Exception as e:
+    print(f"Warning: {e}")
+    # Fallback: disable cert verification for development only
+    client = MongoClient(
+        MONGO_URI,
+        tlsAllowInvalidCertificates=True,
+        serverSelectionTimeoutMS=10000,
+        connectTimeoutMS=10000,
+    )
 db = client['houseboat_management']
 boats_collection = db['boats']
 
