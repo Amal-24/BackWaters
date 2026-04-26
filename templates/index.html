@@ -92,33 +92,6 @@
                     <i class="fas fa-info-circle mr-1"></i> View Details
                 </a>
             </div>
-            
-            <div class="bg-gray-50 px-6 py-4 border-t border-gray-100">
-                <div class="flex justify-between text-xs font-medium text-gray-400 uppercase tracking-wider mb-3">
-                    <span>Recent History</span>
-                </div>
-                <div class="space-y-3">
-                    {% if boat.bookings %}
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-receipt w-6 text-indigo-400"></i>
-                            <span class="font-medium">Latest:</span>
-                            <span class="ml-2">₹{{ "{:,.0f}".format(boat.bookings[-1].revenue) }} ({{ boat.bookings[-1].guest_name }})</span>
-                        </div>
-                    {% else %}
-                        <div class="text-sm text-gray-400 italic">No bookings yet</div>
-                    {% endif %}
-
-                    {% if boat.fuel_expenses %}
-                        <div class="flex items-center text-sm text-gray-600">
-                            <i class="fas fa-gas-pump w-6 text-amber-400"></i>
-                            <span class="font-medium">Fuel:</span>
-                            <span class="ml-2">₹{{ "{:,.0f}".format(boat.fuel_expenses[-1].amount) }} ({{ boat.fuel_expenses[-1].date.strftime('%b %d') }})</span>
-                        </div>
-                    {% else %}
-                        <div class="text-sm text-gray-400 italic">No fuel records</div>
-                    {% endif %}
-                </div>
-            </div>
         </div>
         {% endfor %}
     </div>
