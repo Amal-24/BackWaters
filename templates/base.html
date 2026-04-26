@@ -28,14 +28,21 @@
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
+                        {% if session.get('user') %}
                         <a href="/" class="hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                        {% if session.get('is_admin') %}
                         <a href="/analysis" class="hover:bg-blue-700 px-3 py-2 rounded-md text-sm font-medium">Profitability Analysis</a>
+                        {% endif %}
+                        {% endif %}
                     </div>
                 </div>
-                <div class="md:hidden">
-                    <button class="text-white hover:text-gray-200 focus:outline-none">
-                        <i class="fas fa-bars"></i>
-                    </button>
+                <div class="flex items-center gap-3">
+                    {% if session.get('user') %}
+                    <span class="text-sm">Hello, {{ session.get('user') }}{% if session.get('is_admin') %} (Admin){% endif %}</span>
+                    <a href="/logout" class="bg-white text-blue-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100">Logout</a>
+                    {% else %}
+                    <a href="/login" class="bg-white text-blue-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-100">Login</a>
+                    {% endif %}
                 </div>
             </div>
         </div>

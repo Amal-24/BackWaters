@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto py-20 px-4 sm:px-6 lg:px-8">
+    <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-10">
+        <h1 class="text-3xl font-extrabold text-gray-900 mb-3">Admin Sign In</h1>
+        <p class="text-gray-500 mb-8">Use your admin credentials to manage boats, bookings, and application settings.</p>
+        {% if message %}
+        <div class="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-red-700">{{ message }}</div>
+        {% endif %}
+        <form method="POST" class="space-y-5">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Admin Username</label>
+                <input name="username" type="text" required class="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 outline-none">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input name="password" type="password" required class="mt-2 w-full rounded-2xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-indigo-500 outline-none">
+            </div>
+            <button type="submit" class="w-full bg-indigo-600 text-white rounded-2xl py-3 text-sm font-semibold hover:bg-indigo-700 transition">Login as Admin</button>
+        </form>
+        <p class="mt-6 text-sm text-gray-500">Want guest access instead? <a href="/login" class="text-indigo-600 hover:underline">Login as user</a>.</p>
+    </div>
+</div>
+{% endblock %}

@@ -6,7 +6,12 @@
     <div class="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-xl shadow-sm border border-gray-100 gap-4">
         <div class="flex-grow">
             <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Houseboat Management</h1>
-            <p class="mt-2 text-gray-500">Overview of all boats and their operations.</p>
+            <p class="mt-2 text-gray-500">Overview of rooms, availability, and boat features.</p>
+            {% if session.get('is_admin') %}
+            <p class="mt-1 text-sm text-indigo-600">You are signed in as admin and can manage the app.</p>
+            {% else %}
+            <p class="mt-1 text-sm text-green-600">You are signed in as a guest user. Browse boats and check available rooms.</p>
+            {% endif %}
         </div>
         
         <!-- Search Bar -->
@@ -26,10 +31,12 @@
             </form>
         </div>
 
+        {% if session.get('is_admin') %}
         <button onclick="document.getElementById('addBoatModal').classList.remove('hidden')" 
                 class="gradient-bg text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transform transition active:scale-95 flex items-center gap-2 whitespace-nowrap">
             <i class="fas fa-plus"></i> Add New Boat
         </button>
+        {% endif %}
     </div>
 
     <!-- Boats Grid -->
@@ -42,11 +49,13 @@
                         <i class="fas fa-ship text-2xl"></i>
                     </div>
                     <div class="flex gap-2">
+                        {% if session.get('is_admin') %}
                         <form action="/boat/delete/{{ boat._id }}" method="POST" onsubmit="return confirm('Delete this boat?')">
                             <button type="submit" class="p-2 text-gray-400 hover:text-red-600 transition">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </form>
+                        {% endif %}
                     </div>
                 </div>
                 
@@ -54,7 +63,7 @@
                 <div class="flex flex-wrap gap-2 mb-6">
                     {% set ns = namespace(booked_today=0) %}
                     {% for booking in boat.bookings %}
-                        {% if booking.date == today %}
+                        {% if booking.date.date() == today %}
                             {% set ns.booked_today = ns.booked_today + (booking.rooms_booked if booking.rooms_booked else 1) %}
                         {% endif %}
                     {% endfor %}
@@ -65,18 +74,19 @@
                     <span class="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
                         <i class="fas fa-snowflake mr-1"></i> {{ boat.ac_type }}
                     </span>
+                    <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-sm font-medium rounded-full">
+                        <i class="fas fa-rupee-sign mr-1"></i> ₹{{ boat.get('price_per_room', 0) }}/room
+                    </span>
                 </div>
 
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <button onclick="openBookingModal('{{ boat._id }}', '{{ boat.name }}', '{{ boat.rooms }}')" 
-                            class="w-full px-4 py-2 bg-indigo-50 text-indigo-700 text-sm font-semibold rounded-lg hover:bg-indigo-100 transition text-center">
-                        <i class="fas fa-calendar-plus mr-1"></i> Booking
-                    </button>
+                {% if session.get('is_admin') %}
+                <div class="grid grid-cols-1 gap-4 mb-4">
                     <button onclick="openFuelModal('{{ boat._id }}', '{{ boat.name }}')" 
                             class="w-full px-4 py-2 bg-amber-50 text-amber-700 text-sm font-semibold rounded-lg hover:bg-amber-100 transition text-center">
                         <i class="fas fa-gas-pump mr-1"></i> Fuel
                     </button>
                 </div>
+                {% endif %}
                 <a href="/boat/{{ boat._id }}" 
                    class="block w-full px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition text-center shadow-sm">
                     <i class="fas fa-info-circle mr-1"></i> View Details
@@ -145,6 +155,11 @@
                             <option value="Non-AC">Non-AC</option>
                         </select>
                     </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Price per Room (₹)</label>
+                    <input type="number" name="price_per_room" required min="1" step="0.01" placeholder="e.g. 5000" 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
                 </div>
                 <button type="submit" class="w-full gradient-bg text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition">
                     Create Boat
@@ -233,13 +248,25 @@
 </div>
 
 <script>
-    function openBookingModal(boatId, boatName, totalRooms) {
+    function openBookingModal(button) {
+        const boatId = button.dataset.boatId;
+        const boatName = button.dataset.boatName;
+        const pricePerRoom = parseFloat(button.dataset.price);
+        const totalRooms = parseInt(button.dataset.rooms);
         document.getElementById('bookingForm').action = '/booking/add/' + boatId;
         document.getElementById('bookingBoatName').innerText = boatName;
         const roomsInput = document.querySelector('#bookingModal input[name="rooms_booked"]');
+        const revenueInput = document.querySelector('#bookingModal input[name="revenue"]');
         if (roomsInput) {
             roomsInput.max = totalRooms;
             roomsInput.value = 1;
+            roomsInput.addEventListener('input', function() {
+                revenueInput.value = this.value * pricePerRoom;
+            });
+        }
+        if (revenueInput) {
+            revenueInput.value = 1 * pricePerRoom;
+            revenueInput.readOnly = true;
         }
         document.getElementById('bookingModal').classList.remove('hidden');
     }
